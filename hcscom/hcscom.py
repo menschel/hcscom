@@ -24,7 +24,7 @@ class displaystatus(IntEnum):
 
 def splitbytes(data=b"320160",width=3,decimals=1):
     """ helper function to split the values from device"""
-    vals = [int(data[idx:idx+width])/(10*decimals) for idx in range(0,len(data),width)]
+    vals = tuple(int(data[idx:idx+width])/(10**decimals) for idx in range(0,len(data),width))
     return vals
 
 
@@ -153,6 +153,11 @@ class HcsCom:
         return self.request("SOCP{0}".format(int(val)*10))
 
 
+
+def test_split_bytes():
+    assert splitbytes(data=b"112233",width=3,decimals=1) == (11.2,23.3)
+    assert splitbytes(data=b"22221111",width=4,decimals=2) == (22.22,11.11)
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
@@ -161,5 +166,3 @@ if __name__ == "__main__":
     port = args.interface
      
     hcs = HcsCom(port=port)
-    
-        
