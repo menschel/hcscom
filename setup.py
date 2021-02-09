@@ -14,18 +14,18 @@ setuptools.setup(
     url="https://github.com/menschel/hcscom",
     packages=setuptools.find_packages(),
     classifiers=[
-        "Development Status :: 5 - Production/Stable", #used for years without any problems
+        "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Operating System :: OS Independent",
-        'Intended Audience :: Science/Research',
-        'Intended Audience :: Developers',
-        'Topic :: Scientific/Engineering',
-        'Topic :: Software Development :: Embedded Systems',
-        'Topic :: Utilities',
+        "Intended Audience :: Science/Research",
+        "Intended Audience :: Developers",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Software Development :: Embedded Systems",
+        "Topic :: Utilities",
     ],
     python_requires='>=3.6',
     install_requires=["pyserial"],
-    keywords='remote psu',
+    keywords='remote psu power-supply',
 
 )
