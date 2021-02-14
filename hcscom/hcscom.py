@@ -31,7 +31,12 @@ def splitbytes(data=b"320160",width=3,decimals=1):
 class HcsCom:
 
     def __init__(self,port):
-        self.ser = serial.Serial(port=port,baudrate=9600,bytesize=serial.EIGHTBITS,parity=serial.PARITY_EVEN,stopbits=serial.STOPBITS_ONE)
+        if isinstance(port,str):
+            self.ser = serial.Serial(port=port,baudrate=9600,bytesize=serial.EIGHTBITS,parity=serial.PARITY_EVEN,stopbits=serial.STOPBITS_ONE)
+        elif isinstance(port,serial.Serial):
+            pass
+        else:
+            raise ValueError("Not handling {0}".format(type(port)))
         self.sio = io.TextIOWrapper(io.BufferedRWPair(self.ser, self.ser), newline="\r")
         self.max_voltage = None
         self.max_current = None
@@ -69,10 +74,10 @@ class HcsCom:
         """        
         data = self.request("GMAX")
         if len(data) == 6:
-            self.value_format = "3.1f"
+            self.value_format = "{3.1f}"
         elif len(data) == 8:
-            self.value_format = "4.2f"
-        self.width,self.decimals = [int(x) for x in self.value_format.rstrip("f").split(".")]
+            self.value_format = "{4.2f}"
+        self.width,self.decimals = [int(x) for x in self.value_format.rstrip("f{}").split(".")]
         self.max_voltage,self.max_current = splitbytes(data,width=self.width,decimals=self.decimals)
 
     def get_max_values(self) -> dict:
@@ -91,7 +96,7 @@ class HcsCom:
 
     def set_voltage(self,val):
         """ set the voltage limit """
-        return self.request("VOLT{0}".format(int(val)*10))
+        return self.request("VOLT{0}".format(int(val)*10)) # FIXME: we only speak 3.1f currently
 
     def set_current(self,val):
         """ set the current limit """        
