@@ -5,14 +5,14 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="hcscom",
-    version="0.1.0",
+    version="0.2.0",
     author="Patrick Menschel",
     author_email="menschel.p@posteo.de",
     description="An interface class to manson hcs lab power supplies",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/menschel/hcscom",
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(exclude = ['tests',]),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3",
