@@ -1,1 +1,1 @@
-from hcscom.hcscom import HcsCom,responsestatus,outputstatus,displaystatus
+from hcscom.hcscom import HcsCom, ResponseStatus, OutputStatus, DisplayStatus
