@@ -7,7 +7,7 @@
 from serial import Serial
 
 from hcscom.hcscom import split_data_to_values, OutputStatus, FORMAT_THREE_DIGITS, format_to_width_and_decimals, \
-    format_val
+    format_val, DisplayStatus
 
 
 class HcsMock(Serial):
@@ -20,9 +20,10 @@ class HcsMock(Serial):
         """ a simulator for hcscom """
         self.out_buffer = bytearray()
         self.display_values = [1, 1]
-        self.presets = [[1, 1], [2, 2], [3, 3]]
+        self.presets = [[1.0, 1.0], [2.0, 2.0], [3.0, 3.0]]
         self.active_preset = self.presets[0]
         self.output_status = OutputStatus.off
+        self.display_status = DisplayStatus.cv
 
         self.value_format = FORMAT_THREE_DIGITS
         self.width, self.decimals = format_to_width_and_decimals(self.value_format)
@@ -52,20 +53,21 @@ class HcsMock(Serial):
         elif command == "VOLT":
             values = split_data_to_values(data=value_data, width=self.width, decimals=self.decimals)
             assert len(values) == 1
-            self.active_preset[0] = values[0]
+            self.display_values[0] = values[0]
         elif command == "CURR":
             values = split_data_to_values(data=value_data, width=self.width, decimals=self.decimals)
             assert len(values) == 1
-            self.active_preset[1] = values[0]
+            self.display_values[1] = values[0]
         elif command == "RUNM":
             value = int(value_data[0])
+            assert value in range(1, 4)
             self.active_preset = self.presets[value]
             self.display_values = self.presets[value]
         elif command == "SOVP":
             values = split_data_to_values(data=value_data, width=self.width, decimals=self.decimals)
             assert len(values) == 1
             self.active_preset[0] = values[0]
-        elif command == "SOVP":
+        elif command == "SOCP":
             values = split_data_to_values(data=value_data, width=self.width, decimals=self.decimals)
             assert len(values) == 1
             self.active_preset[1] = values[0]
@@ -81,6 +83,7 @@ class HcsMock(Serial):
         elif command == "GETD":
             for value in self.display_values:
                 response.extend(format_val(val=value, fmt=self.value_format).encode())
+            response.extend("{0}".format(self.display_status).encode())
         elif command == "GETM":
             for preset in self.presets:
                 for value in preset:
@@ -92,9 +95,10 @@ class HcsMock(Serial):
         return response
 
     def write(self, data: bytes):
+        assert data[-1:] == b"\r"
         command = data[:4].decode()
         response = bytearray()
-        value_data = data[4:].decode()
+        value_data = data[4:].decode().strip("\r")
 
         if command in self.set_commands:
             self.handle_sets(command, value_data)
@@ -121,3 +125,13 @@ class HcsMock(Serial):
 
     def inWaiting(self):
         return len(self.out_buffer)
+
+    def open(self):
+        return None
+
+
+class HcsDefectMock(HcsMock):
+
+    def write(self, data: bytes):
+        self.out_buffer = "SOME_UNEXPECTED_ANSWER"
+        return 42
