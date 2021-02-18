@@ -105,7 +105,8 @@ class HcsCom:
         self.max_voltage, self.max_current = split_data_to_values(data, width=self.width, decimals=self.decimals)
 
     def __str__(self):
-        return "Device: {0}\n V: {1}V A: {2}".format("unknown", self.max_voltage, self.max_current)
+        max_values = self.get_max_values()
+        return "Device: {0}\n V: {1}V A: {2}".format("unknown", max_values.get("voltage"), max_values.get("current"))
 
     def get_max_values(self) -> dict:
         """ return the max values """
@@ -151,9 +152,9 @@ class HcsCom:
         data = self.request("GETM")
         volt, curr, volt2, curr2, volt3, curr3 = split_data_to_values(data, width=self.width, decimals=self.decimals)
 
-        return {1: (volt, curr),
-                2: (volt2, curr2),
-                3: (volt3, curr3),
+        return {0: (volt, curr),
+                1: (volt2, curr2),
+                2: (volt3, curr3),
                 }
 
     def load_preset(self, val):
@@ -164,7 +165,7 @@ class HcsCom:
     def get_output_voltage_preset(self):
         """ get the preset voltage """
         data = self.request("GOVP")
-        volt = split_data_to_values(data, width=self.width, decimals=self.decimals)
+        volt = split_data_to_values(data, width=self.width, decimals=self.decimals)[0]
         return volt
 
     def set_output_voltage_preset(self, val):
@@ -174,7 +175,7 @@ class HcsCom:
     def get_output_current_preset(self):
         """ get the preset current """
         data = self.request("GOCP")
-        volt = split_data_to_values(data, width=self.width, decimals=self.decimals)
+        volt = split_data_to_values(data, width=self.width, decimals=self.decimals)[0]
         return volt
 
     def set_output_current_preset(self, val):
