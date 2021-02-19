@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="hcscom",
-    version="0.3.0",
+    version="0.4.0",
     author="Patrick Menschel",
     author_email="menschel.p@posteo.de",
     description="An interface class to manson hcs lab power supplies",
@@ -24,7 +24,7 @@ setuptools.setup(
         "Topic :: Software Development :: Embedded Systems",
         "Topic :: Utilities",
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     install_requires=["pyserial"],
     keywords='remote psu power-supply',
 
