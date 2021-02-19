@@ -61,13 +61,20 @@ class HcsCom:
         self.ser.flush()
         self.max_voltage = None
         self.max_current = None
-        self.value_format = FORMAT_THREE_DIGITS
-        self.width, self.decimals = format_to_width_and_decimals(self.value_format)
+        self.value_format = None
+        self.width = None
+        self.decimals = None
+        self.set_format(FORMAT_THREE_DIGITS)
         try:
             self.probe_device()
         except BaseException as e:
             print(e)
             exit(1)
+
+    def set_format(self, fmt):
+        """ helper function to set the format and keep consistency """
+        self.value_format = fmt
+        self.width, self.decimals = format_to_width_and_decimals(self.value_format)
 
     def request(self, msg):
         """ send command to device and receive the response """
@@ -79,18 +86,20 @@ class HcsCom:
             ser.write(msg_)
             ret = None
             line_buffer = bytearray()
-            while b"OK\r" not in line_buffer:
+            for i in range(2):
                 data = ser.read(1)
                 if data:
                     line_buffer.extend(data)
                     line_buffer.extend(ser.read(ser.inWaiting()))
+                    if b"OK\r" in line_buffer:
+                        break
             for line in line_buffer.decode().split("\r"):
                 LOGGER.debug("<< {0}".format(line))
                 if line == "OK":
                     return ret
                 elif line:
                     ret = line
-        raise RuntimeError("Got unexpected status, {0}".format(line_buffer))
+        raise RuntimeError("Got unexpected response, {0}".format(line_buffer))
 
     def probe_device(self):
         """ probe for a device
@@ -140,12 +149,21 @@ class HcsCom:
         status = int(data[-1])
         return volt, curr, status
 
-    def set_presets_to_memory(self):
+    def set_presets_to_memory(self, presets=None):
         """ program preset values into memory
             TODO: check if there are always 3 presets
         """
-        # PROM
-        pass
+        if not presets:
+            presets = {0: (5, self.max_current),
+                       1: (13.8, self.max_current),
+                       2: (self.max_voltage, self.max_current),
+                       }
+        values = []
+        for idx, preset in presets.items():
+            values.extend(preset)
+        assert len(values) == 6
+        content = "".join([format_val(value, self.value_format) for value in values])
+        return self.request("PROM{0}".format(content))
 
     def get_presets_from_memory(self) -> dict:
         """ get the presets from device memory """

@@ -25,11 +25,13 @@ class HcsMock(Serial):
         self.output_status = OutputStatus.off
         self.display_status = DisplayStatus.cv
 
-        self.value_format = FORMAT_THREE_DIGITS
-        self.width, self.decimals = format_to_width_and_decimals(self.value_format)
+        self.value_format = None
+        self.width = None
+        self.decimals = None
+        self.set_format(FORMAT_THREE_DIGITS)
         self.max_voltage = 32.2
         self.max_current = 20.2
-        self.get_commands = {"GMAX": None,
+        self.get_commands = {"GMAX": None,  # relay a function here later
                              "GETS": None,
                              "GETD": None,
                              "GETM": None,
@@ -42,8 +44,14 @@ class HcsMock(Serial):
                              "RUNM": None,
                              "SOVP": None,
                              "SOCP": None,
+                             "PROM": None,
                              }
         super().__init__()
+
+    def set_format(self, fmt):
+        """ helper function to set the format and keep consistency """
+        self.value_format = fmt
+        self.width, self.decimals = format_to_width_and_decimals(self.value_format)
 
     def handle_sets(self, command, value_data):
         if command == "SOUT":
@@ -71,6 +79,9 @@ class HcsMock(Serial):
             values = split_data_to_values(data=value_data, width=self.width, decimals=self.decimals)
             assert len(values) == 1
             self.active_preset[1] = values[0]
+        elif command == "PROM":
+            values = split_data_to_values(value_data, width=self.width, decimals=self.decimals)
+            self.presets = [values[:2], values[2:4], values[4:]]
 
     def handle_gets(self, command):
         response = bytearray()
@@ -133,5 +144,5 @@ class HcsMock(Serial):
 class HcsDefectMock(HcsMock):
 
     def write(self, data: bytes):
-        self.out_buffer = "SOME_UNEXPECTED_ANSWER"
+        self.out_buffer = b"SOME_UNEXPECTED_ANSWER"
         return 42

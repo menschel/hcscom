@@ -3,11 +3,11 @@
 (c) Patrick Menschel 2021
 
 """
+import pytest
 
 from hcscom.hcscom import split_data_to_values, HcsCom, OutputStatus, FORMAT_FOUR_DIGITS, format_to_width_and_decimals
-
 from .mocks import HcsMock,HcsDefectMock
-import pytest
+
 
 def test_split_bytes():
     assert split_data_to_values(data="112233", width=3, decimals=1) == (11.2, 23.3)
@@ -15,7 +15,11 @@ def test_split_bytes():
 
 
 @pytest.mark.xfail
-def test_obj_creation_should_fail_wrong_port():
+def test_obj_creation_should_fail_wrong_port_string():
+    hcs = HcsCom(port="some_port")
+
+@pytest.mark.xfail
+def test_obj_creation_should_fail_wrong_port_type():
     hcs = HcsCom(port=None)
 
 
@@ -80,6 +84,11 @@ def test_preset_selection():
     assert hcs.get_display_status()[:-1] == test_preset
     assert hcs.get_output_voltage_preset() == test_preset[0]
     assert hcs.get_output_current_preset() == test_preset[1]
+    presets = hcs.get_presets_from_memory()
+    for idx, preset in enumerate(mock.presets):
+        for num1, num2 in zip(preset, presets.get(idx)):
+            assert num1 == num2
+    hcs.set_presets_to_memory()
     presets = hcs.get_presets_from_memory()
     for idx, preset in enumerate(mock.presets):
         for num1, num2 in zip(preset, presets.get(idx)):
