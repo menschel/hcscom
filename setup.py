@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="hcscom",
-    version="0.4.0",
+    version="0.4.1",
     author="Patrick Menschel",
     author_email="menschel.p@posteo.de",
     description="An interface class to manson hcs lab power supplies",

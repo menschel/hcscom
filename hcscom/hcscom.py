@@ -159,8 +159,8 @@ class HcsCom:
                        2: (self.max_voltage, self.max_current),
                        }
         values = []
-        for idx, preset in presets.items():
-            values.extend(preset)
+        for idx in range(len(presets)):
+            values.extend(presets.get(idx))
         assert len(values) == 6
         content = "".join([format_val(value, self.value_format) for value in values])
         return self.request("PROM{0}".format(content))
