@@ -107,10 +107,10 @@ class HcsCom:
         """
         data = self.request("GMAX")
         if len(data) == 6:
-            self.value_format = FORMAT_THREE_DIGITS
+            fmt = FORMAT_THREE_DIGITS
         elif len(data) == 8:
-            self.value_format = FORMAT_FOUR_DIGITS
-        self.width, self.decimals = format_to_width_and_decimals(self.value_format)
+            fmt = FORMAT_FOUR_DIGITS
+        self.set_format(fmt)
         self.max_voltage, self.max_current = split_data_to_values(data, width=self.width, decimals=self.decimals)
 
     def __str__(self):

@@ -51,9 +51,9 @@ def test_display_set():
 
 def test_display_set_format_four_digits():
     mock = HcsMock()
-    mock.value_format = FORMAT_FOUR_DIGITS
-    mock.width, mock.decimals = format_to_width_and_decimals(mock.value_format)
+    mock.set_format(FORMAT_FOUR_DIGITS)
     hcs = HcsCom(port=mock)
+    assert hcs.value_format == FORMAT_FOUR_DIGITS
     volt = 12
     hcs.set_voltage(volt)
     assert mock.display_values[0] == volt
